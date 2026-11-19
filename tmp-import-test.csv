@@ -1,0 +1,4 @@
+Name,Amount,Date,Category,Type,Comments
+Office supplies,25.50,2026-11-10,Supplies Expense,Cash,Imported test row
+Coffee meeting,12.00,2026-11-11,Dining out,Cash,Should create category if missing
+Refund stationery,-8.00,2026-11-12,Supplies Expense,Cash,Credit/refund row

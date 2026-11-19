@@ -1,0 +1,307 @@
+<!-- <div id="enter-expense" class="mt-4">
+  <form #expenseForm="ngForm" novalidate (ngSubmit)="saveExpense(expenseForm.valid, expenseForm)">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Expense Details</mat-card-title>
+        <mat-card-subtitle class="fw-lighter my-2">Add required details to save expense</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="row">
+          <div class="col-12 mb-1">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Expense name</mat-label>
+              <input
+                matInput
+                name="expenseName"
+                type="text"
+                [(ngModel)]="expenseObj.name"
+                #expenseName="ngModel"
+                required
+                minlength="4" />
+              <mat-error *ngIf="expenseName.errors && (expenseName.dirty || expenseName.touched)">
+                Expense Name is required (minimum 4 characters).
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Amount</mat-label>
+              <input
+                matInput
+                type="number"
+                min="1"
+                name="amount"
+                [(ngModel)]="expenseObj.amount"
+                (blur)="formatAmount()"
+                #amount="ngModel"
+                required />
+              <mat-error *ngIf="amount.errors && (amount.dirty || amount.touched)">
+                Amount is required (positive amount, max 2 decimal places).
+              </mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Expense Date</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="expensePicker"
+                  [(ngModel)]="expenseObj.date"
+                  [max]="maxDate"
+                  name="date"
+                  #date="ngModel"
+                  (click)="expensePicker.open()"
+                  (dateChange)="checkDate()"
+                  required />
+                <mat-datepicker-toggle matSuffix [for]="expensePicker"></mat-datepicker-toggle>
+                <mat-datepicker #expensePicker></mat-datepicker>
+                <mat-error> Date is required.</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-lg-6">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Expense Category</mat-label>
+              <mat-select [(ngModel)]="expenseObj.category" name="category" #category="ngModel" required>
+                <mat-option *ngFor="let category of categories" [value]="category">
+                  {{ category }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="category.errors && (category.dirty || category.touched)">
+                Category is required.
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-lg-6">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Payment Source</mat-label>
+              <mat-select [(ngModel)]="expenseObj.type" name="payment" #payment="ngModel" required>
+                <mat-option *ngFor="let type of types" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+              <mat-error *ngIf="payment.errors && (payment.dirty || payment.touched)"> Payment is required.</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Comments</mat-label>
+              <textarea matInput [(ngModel)]="expenseObj.comments" name="comments"></textarea>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <div class="d-flex justify-content-end full-width">
+          <button class="me-2" type="button" mat-button (click)="clearForm(expenseForm)">Reset</button>
+          <button type="submit" mat-stroked-button color="primary" [disabled]="!expenseForm.form.valid">
+            <mat-icon>save</mat-icon>
+            Save
+          </button>
+        </div>
+      </mat-card-actions>
+    </mat-card>
+  </form>
+</div> -->
+<div id="enter-transaction" class="mt-4">
+  <form #transactionForm="ngForm" novalidate (ngSubmit)="saveTransaction(transactionForm.valid, transactionForm)">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Transaction Details</mat-card-title>
+        <mat-card-subtitle class="fw-lighter my-2"
+          >Add required transaction details to save transaction</mat-card-subtitle
+        >
+      </mat-card-header>
+      <ng-container *ngIf="!isLoading; else loadingSpinner">
+        <mat-card-content>
+          <div class="row">
+            <div class="col-lg-6 mb-1">
+              <mat-form-field appearance="outline">
+                <mat-label>Debit Account name</mat-label>
+                <mat-select
+                  [(ngModel)]="transactionObj.debitAccountName"
+                  name="debitAccountName"
+                  #debitAccountName="ngModel"
+                  required>
+                  <mat-option *ngFor="let account of chartOfAccounts" [value]="account.name">
+                    {{ account.name }} ({{ account.type }})
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="debitAccountName.errors && (debitAccountName.dirty || debitAccountName.touched)">
+                  Debit account is required.
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col-lg-6 mb-1">
+              <mat-form-field appearance="outline">
+                <mat-label>Credit Account Name</mat-label>
+                <mat-select
+                  [(ngModel)]="transactionObj.creditAccountName"
+                  name="creditAccountName"
+                  #creditAccountName="ngModel"
+                  required>
+                  <mat-option *ngFor="let account of chartOfAccounts" [value]="account.name">
+                    {{ account.name }} ({{ account.type }})
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="creditAccountName.errors && (creditAccountName.dirty || creditAccountName.touched)">
+                  Credit account is required.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-lg-6 mb-1">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Debit Amount</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  name="DebitAmount"
+                  [(ngModel)]="transactionObj.debitAmount"
+                  (blur)="formatAmount()"
+                  #debitAmount="ngModel"
+                  required />
+                <mat-error *ngIf="debitAmount.errors && (debitAmount.dirty || debitAmount.touched)">
+                  Debit Amount is required (positive amount, max 2 decimal places).
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col-lg-6 mb-1">
+              <mat-form-field appearance="outline">
+                <mat-label>Credit Amount</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  name="creditAmount"
+                  [(ngModel)]="transactionObj.creditAmount"
+                  (blur)="formatAmount()"
+                  #creditAmount="ngModel"
+                  required />
+                <mat-error *ngIf="creditAmount.errors && (creditAmount.dirty || creditAmount.touched)">
+                  Credit Amount is required (positive amount, max 2 decimal places).
+                </mat-error>
+                <mat-error
+                  *ngIf="
+                    transactionObj.debitAmount &&
+                    transactionObj.creditAmount &&
+                    transactionObj.debitAmount !== transactionObj.creditAmount
+                  ">
+                  Debit and Credit must balance.
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+          <!-- <div class="row">
+            <div class="col-lg-6 mb-1">
+              <mat-form-field appearance="outline">
+                <mat-label>Debit Account Balance</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  name="debitAccountBalance"
+                  [(ngModel)]="transactionObj.debitAccountBalance"
+                  (blur)="formatAmount()"
+                  #debitAccountBalance="ngModel"
+                  required />
+                <mat-error *ngIf="debitAccountBalance.errors && (debitAccountBalance.dirty || debitAccountBalance.touched)">
+                  Debit Account Balance is required (positive amount, max 2 decimal places).
+                </mat-error>
+              </mat-form-field>
+            </div>
+            <div class="col-lg-6 mb-1">
+              <mat-form-field appearance="outline">
+                <mat-label>Credit Account Balance</mat-label>
+                <input
+                  matInput
+                  type="number"
+                  min="1"
+                  name="creditAccountBalance"
+                  [(ngModel)]="transactionObj.creditAccountBalance"
+                  (blur)="formatAmount()"
+                  #creditAccountBalance="ngModel"
+                  required />
+                <mat-error *ngIf="creditAccountBalance.errors && (creditAccountBalance.dirty || creditAccountBalance.touched)">
+                  Credit Account Balance is required (positive amount, max 2 decimal places).
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div> -->
+          <div class="row">
+            <div class="col-12 col-lg-6">
+              <div>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Transaction Date</mat-label>
+                  <input
+                    matInput
+                    [matDatepicker]="transactionPicker"
+                    [(ngModel)]="transactionObj.date"
+                    [max]="maxDate"
+                    name="date"
+                    #date="ngModel"
+                    (click)="transactionPicker.open()"
+                    (dateChange)="checkDate()"
+                    required />
+                  <mat-datepicker-toggle matSuffix [for]="transactionPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #transactionPicker></mat-datepicker>
+                  <mat-error> Date is required.</mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 mb-1">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Transaction Description</mat-label>
+                <input
+                  matInput
+                  name="transactionName"
+                  type="text"
+                  [(ngModel)]="transactionObj.description"
+                  #transactionDescription="ngModel"
+                  required
+                  minlength="4" />
+                <mat-error
+                  *ngIf="
+                    transactionDescription.errors && (transactionDescription.dirty || transactionDescription.touched)
+                  ">
+                  Transaction Description is required (minimum 4 characters).
+                </mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <div class="d-flex justify-content-end full-width">
+            <button class="me-2" type="button" mat-button (click)="clearForm(transactionForm)">Reset</button>
+            <button
+              type="submit"
+              mat-stroked-button
+              color="primary"
+              [disabled]="!transactionForm.form.valid || !canSaveTransaction">
+              <mat-icon>save</mat-icon>
+              Save
+            </button>
+          </div>
+        </mat-card-actions>
+      </ng-container>
+    </mat-card>
+  </form>
+</div>
+<ng-template #loadingSpinner>
+  <mat-card-content>
+    <app-card-spinner></app-card-spinner>
+  </mat-card-content>
+</ng-template>

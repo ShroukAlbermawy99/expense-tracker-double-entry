@@ -1,0 +1,132 @@
+<h1 mat-dialog-title>{{ data.title }}</h1>
+<div mat-dialog-content>
+  @if (data.editType === 'delete') {
+    <div class="mt-2">
+      Are you sure you want to delete these
+      {{ isAccountMode ? 'accounts' : 'expenses' }}? <strong>This action cannot be undone.</strong>
+    </div>
+  } @else {
+    <form [formGroup]="editForm">
+      @if (data.editType === 'category') {
+        <mat-form-field appearance="outline" class="full-width mt-2">
+          <mat-label>{{ isAccountMode ? 'Account Type' : 'Category' }}</mat-label>
+          <mat-select formControlName="category">
+            <mat-option *ngFor="let category of isAccountMode ? accountTypes : categories" [value]="category">
+              {{ category }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="editForm.get('category')?.errors?.['required']">
+            {{ isAccountMode ? 'Account type' : 'Category' }} is required
+          </mat-error>
+        </mat-form-field>
+      } @else {
+        <mat-form-field appearance="outline" class="full-width mt-2">
+          <mat-label>{{ isAccountMode ? 'Source' : 'Payment Type' }}</mat-label>
+          <mat-select formControlName="type">
+            <mat-option *ngFor="let type of isAccountMode ? sourceTypes : paymentTypes" [value]="type">
+              {{ type }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="editForm.get('type')?.errors?.['required']">
+            {{ isAccountMode ? 'Source' : 'Payment type' }} is required
+          </mat-error>
+        </mat-form-field>
+      }
+    </form>
+  }
+
+  <div class="selected-items-table mt-4">
+    <span class="fw-normal fs-6">
+      Selected Items ({{ isAccountMode ? (data.accounts?.length ?? 0) : (data.expenses?.length ?? 0) }})
+    </span>
+    <div class="table-container">
+      @if (isAccountMode) {
+        <table mat-table [dataSource]="selectedAccounts">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Balance</th>
+            <td mat-cell *matCellDef="let element">{{ element.balance | currency }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let element">{{ element.createdAt | date: 'MMM dd, yyyy' }}</td>
+          </ng-container>
+
+          @if (data.editType === 'category') {
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Current Type</th>
+              <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+            </ng-container>
+          } @else if (data.editType === 'type') {
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Current Source</th>
+              <td mat-cell *matCellDef="let element">{{ element.source }}</td>
+            </ng-container>
+          } @else {
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+            </ng-container>
+          }
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      } @else {
+        <table mat-table [dataSource]="selectedExpenses">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Name</th>
+            <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef>Amount</th>
+            <td mat-cell *matCellDef="let element">{{ element.amount | currency }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let element">{{ element.date | date: 'MMM dd, yyyy' }}</td>
+          </ng-container>
+
+          @if (data.editType === 'category') {
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Current Category</th>
+              <td mat-cell *matCellDef="let element">{{ element.category }}</td>
+            </ng-container>
+          } @else if (data.editType === 'type') {
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Current Type</th>
+              <td mat-cell *matCellDef="let element">{{ element.type }}</td>
+            </ng-container>
+          } @else {
+            <ng-container matColumnDef="category">
+              <th mat-header-cell *matHeaderCellDef>Category</th>
+              <td mat-cell *matCellDef="let element">{{ element.category }}</td>
+            </ng-container>
+          }
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      }
+    </div>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancelClick()" cdkFocusInitial>{{ data.cancelButtonText }}</button>
+  @if (data.editType !== 'delete') {
+    <button mat-stroked-button [disabled]="editForm.invalid" (click)="bulkUpdate()">
+      {{ data.confirmButtonText }}
+    </button>
+  } @else {
+    <button mat-stroked-button color="warn" (click)="bulkDelete()" cdkFocusInitial>
+      {{ data.confirmButtonText }}
+    </button>
+  }
+</div>
